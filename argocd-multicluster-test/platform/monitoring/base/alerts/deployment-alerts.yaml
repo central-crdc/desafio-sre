@@ -1,0 +1,26 @@
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: deployment-alerts
+  namespace: monitoring
+spec:
+  groups:
+  - name: deployment
+    rules:
+    - alert: DeploymentReplicasMismatch
+      expr: kube_deployment_spec_replicas{job="kube-state-metrics"} != kube_deployment_status_replicas_available{job="kube-state-metrics"}
+      for: 15m
+      labels:
+        severity: warning
+      annotations:
+        summary: "Deployment replicas mismatch ({{ $labels.namespace }}/{{ $labels.deployment }})"
+        description: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} has not matched the expected number of replicas for 15 minutes."
+        
+    - alert: DeploymentNotProgressing
+      expr: kube_deployment_status_observed_generation{job="kube-state-metrics"} - kube_deployment_metadata_generation{job="kube-state-metrics"} < 0
+      for: 15m
+      labels:
+        severity: critical
+      annotations:
+        summary: "Deployment not progressing ({{ $labels.namespace }}/{{ $labels.deployment }})"
+        description: "Deployment {{ $labels.namespace }}/{{ $labels.deployment }} is not progressing for 15 minutes."

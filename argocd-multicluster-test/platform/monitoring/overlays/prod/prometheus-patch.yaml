@@ -1,0 +1,22 @@
+apiVersion: monitoring.coreos.com/v1
+kind: Prometheus
+metadata:
+  name: prometheus-k8s
+  namespace: monitoring
+spec:
+  replicas: 2
+  retention: 30d
+  resources:
+    requests:
+      memory: 1Gi
+      cpu: 500m
+    limits:
+      memory: 2Gi
+      cpu: 1000m
+  storage:
+    volumeClaimTemplate:
+      spec:
+        storageClassName: "gp2"
+        resources:
+          requests:
+            storage: 100Gi

@@ -1,0 +1,82 @@
+version: 3
+automerge: false
+parallel_plan: true
+parallel_apply: false
+
+projects:
+# Dev environment
+- name: dev-us-east-1-vpc
+  dir: environments/dev/us-east-1/vpc
+  workflow: terragrunt-dev
+  autoplan:
+    when_modified: ["*.hcl", "*.tf"]
+    enabled: true
+
+- name: dev-us-east-1-eks
+  dir: environments/dev/us-east-1/eks
+  workflow: terragrunt-dev
+  autoplan:
+    when_modified: ["*.hcl", "*.tf"]
+    enabled: true
+
+# Staging environment
+- name: staging-us-east-1-vpc
+  dir: environments/staging/us-east-1/vpc
+  workflow: terragrunt-staging
+  autoplan:
+    when_modified: ["*.hcl", "*.tf"]
+    enabled: true
+
+# Production environment
+- name: prod-us-east-1-vpc
+  dir: environments/prod/us-east-1/vpc
+  workflow: terragrunt-prod
+  autoplan:
+    when_modified: ["*.hcl", "*.tf"]
+    enabled: true
+
+# Define workflows específicos por ambiente com diferentes approvers
+workflows:
+  terragrunt-dev:
+    plan:
+      steps:
+      - env:
+          name: AWS_PROFILE
+          value: dev
+        run: terragrunt plan -no-color -out=$PLANFILE
+    apply:
+      steps:
+      - env:
+          name: AWS_PROFILE
+          value: dev
+        run: terragrunt apply -no-color $PLANFILE
+
+  terragrunt-staging:
+    plan:
+      steps:
+      - env:
+          name: AWS_PROFILE
+          value: staging
+        run: terragrunt plan -no-color -out=$PLANFILE
+    apply:
+      steps:
+      - env:
+          name: AWS_PROFILE
+          value: staging
+        run: terragrunt apply -no-color $PLANFILE
+
+  terragrunt-prod:
+    plan:
+      steps:
+      - env:
+          name: AWS_PROFILE
+          value: prod
+        run: terragrunt plan -no-color -out=$PLANFILE
+    apply:
+      steps:
+      - env:
+          name: AWS_PROFILE
+          value: prod
+        run: terragrunt apply -no-color $PLANFILE
+      requires:
+        approvals: 2

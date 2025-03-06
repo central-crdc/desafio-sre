@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+data:
+  db_host: "database-service"
+  api_mode: "standard"
+  log_level: "info"

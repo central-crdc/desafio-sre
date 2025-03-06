@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-cm
+  namespace: argocd
+  labels:
+    app.kubernetes.io/name: argocd-cm
+    app.kubernetes.io/part-of: argocd
+data:
+  # Configurações de URL do servidor ArgoCD
+  url: https://argocd.example.com
+
+  # Configurações de repositórios
+  repositories: |
+    - type: git
+      url: https://github.com/organization/application-repo
+      name: application-repo
+    - type: git
+      url: https://github.com/organization/platform-repo
+      name: platform-repo
+
+  # Configuração de cluster - formato admitido pelo ArgoCD
+  kustomize.buildOptions: "--enable-helm"
+
+  # Recurso personalizado para monitorar status
+  resource.customizations: |
+    argoproj.io/Application:
+      health.lua: |
+        health_status = {}
+        if obj.status ~= nil then
+          if obj.status.health ~= nil then
+            health_status.status = obj.status.health.status
+            if health_status.status == nil then
+              health_status.status = "Progressing"
+            end
+            health_status.message = obj.status.health.message
+          end
+        end
+        return health_status

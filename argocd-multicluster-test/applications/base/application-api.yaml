@@ -1,0 +1,20 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: api-service
+  namespace: argocd
+spec:
+  project: main-applications
+  source:
+    repoURL: https://github.com/organization/application-repo.git
+    targetRevision: HEAD
+    path: workloads/apps/api-service/base
+  destination:
+    server: https://kubernetes.dev.example.com
+    namespace: api-service
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - CreateNamespace=true

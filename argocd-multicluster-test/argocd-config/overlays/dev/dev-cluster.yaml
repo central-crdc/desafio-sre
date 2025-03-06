@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: Secret
+metadata:
+  name: dev-cluster-secret
+  namespace: argocd
+  labels:
+    argocd.argoproj.io/secret-type: cluster
+type: Opaque
+stringData:
+  name: dev-cluster
+  server: https://kubernetes.dev.example.com
+  config: |
+    {
+      "awsAuthConfig": {
+        "clusterName": "dev-eks-cluster",
+        "roleARN": "arn:aws:iam::111122223333:role/ArgoCD-EKS-Access"
+      },
+      "tlsClientConfig": {
+        "insecure": false
+      }
+    }

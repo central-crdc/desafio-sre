@@ -1,0 +1,48 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: platform-components
+  namespace: argocd
+spec:
+  generators:
+  - matrix:
+      generators:
+      - list:
+          elements:
+          - cluster: dev-cluster
+            url: https://kubernetes.dev.example.com
+            env: dev
+          - cluster: staging-cluster
+            url: https://kubernetes.staging.example.com
+            env: staging
+          - cluster: prod-cluster
+            url: https://kubernetes.prod.example.com
+            env: prod
+      - list:
+          elements:
+          - name: ingress-nginx
+            namespace: ingress-nginx
+          - name: cert-manager
+            namespace: cert-manager
+          - name: monitoring
+            namespace: monitoring
+          - name: logging
+            namespace: logging
+  template:
+    metadata:
+      name: '{{name}}-{{env}}'
+    spec:
+      project: platform
+      source:
+        repoURL: https://github.com/organization/platform-repo.git
+        targetRevision: HEAD
+        path: platform/{{name}}/overlays/{{env}}
+      destination:
+        server: '{{url}}'
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true

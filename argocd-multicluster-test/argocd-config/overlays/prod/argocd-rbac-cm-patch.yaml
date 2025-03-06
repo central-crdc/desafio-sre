@@ -1,0 +1,21 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: argocd-rbac-cm
+  namespace: argocd
+data:
+  policy.csv: |
+    # Políticas restritas para produção
+    # Somente SREs e admins podem fazer alterações em produção
+    p, role:sre, applications, *, prod-cluster/*, allow
+    p, role:prod-approver, applications, action/approve, prod-cluster/*, allow
+    
+    # Dev leads só podem ver produção
+    p, role:dev-lead, applications, get, prod-cluster/*, allow
+    
+    # Requer aprovação para sincronização em produção
+    p, role:prod-deployer, applications, sync, prod-cluster/*, allow
+    
+    # Mapeamento de grupos
+    g, prod-approvers, role:prod-approver
+    g, prod-deployers, role:prod-deployer

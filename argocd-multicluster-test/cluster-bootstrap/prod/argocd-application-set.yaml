@@ -1,0 +1,51 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-bootstrap-prod
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - name: ingress-nginx
+        namespace: ingress-nginx
+      - name: cert-manager
+        namespace: cert-manager
+      - name: monitoring
+        namespace: monitoring
+      - name: logging
+        namespace: logging
+  template:
+    metadata:
+      name: '{{name}}-prod'
+    spec:
+      project: platform
+      source:
+        repoURL: https://github.com/organization/platform-repo.git
+        targetRevision: HEAD
+        path: platform/{{name}}/overlays/prod
+      destination:
+        server: https://kubernetes.prod.example.com
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true
+      # Estratégia de sincronização conservadora para produção
+      syncOptions:
+      - Validate=true
+      - CreateNamespace=true
+      - PruneLast=true
+      # Configurar janela de sincronização para manutenção programada
+      # syncWindows:
+      # - kind: allow
+      #   schedule: "0 22 * * *"
+      #   duration: 2h
+      #   applications:
+      #   - '*-prod'
+      #   namespaces:
+      #   - '*'
+      #   clusters:
+      #   - prod-cluster

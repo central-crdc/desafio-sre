@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: frontend-config
+data:
+  api_url: "http://api-service.api-service-dev.svc.cluster.local"
+  features_enabled: "development,beta"

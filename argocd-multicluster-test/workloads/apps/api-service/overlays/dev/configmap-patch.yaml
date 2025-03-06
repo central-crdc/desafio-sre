@@ -1,0 +1,8 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+data:
+  db_host: "database-service.database-dev"
+  api_mode: "development"
+  log_level: "debug"

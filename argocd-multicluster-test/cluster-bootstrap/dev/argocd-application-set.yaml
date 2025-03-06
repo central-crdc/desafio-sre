@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: cluster-bootstrap-dev
+  namespace: argocd
+spec:
+  generators:
+  - list:
+      elements:
+      - name: ingress-nginx
+        namespace: ingress-nginx
+      - name: cert-manager
+        namespace: cert-manager
+      - name: monitoring
+        namespace: monitoring
+      - name: logging
+        namespace: logging
+  template:
+    metadata:
+      name: '{{name}}-dev'
+    spec:
+      project: platform
+      source:
+        repoURL: https://github.com/organization/platform-repo.git
+        targetRevision: HEAD
+        path: platform/{{name}}/overlays/dev
+      destination:
+        server: https://kubernetes.dev.example.com
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true

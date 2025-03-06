@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: api-config
+data:
+  db_host: "database-service.database-prod.svc.cluster.local"
+  api_mode: "production"
+  log_level: "warn"
+  metrics_enabled: "true"

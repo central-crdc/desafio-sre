@@ -1,0 +1,47 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: main-applications
+  namespace: argocd
+spec:
+  description: "Projeto principal para aplicações de negócio"
+  
+  # Origem dos repositórios Git confiáveis
+  sourceRepos:
+  - "https://github.com/organization/application-repo.git"
+  
+  # Destinos permitidos para implantação
+  destinations:
+  - namespace: "*"
+    server: https://kubernetes.dev.example.com
+  - namespace: "*"
+    server: https://kubernetes.staging.example.com
+  - namespace: "*"
+    server: https://kubernetes.prod.example.com
+  
+  # Tipos de recursos do Kubernetes permitidos
+  clusterResourceWhitelist:
+  - group: ""
+    kind: Namespace
+  - group: "networking.k8s.io"
+    kind: Ingress
+  
+  # Recursos permitidos em namespaces
+  namespaceResourceWhitelist:
+  - group: "*"
+    kind: "*"
+  
+  # Regras de validação para impedir alterações específicas
+  roles:
+  - name: read-only
+    description: Read-only access to the project
+    policies:
+    - p, proj:main-applications:read-only, applications, get, main-applications/*, allow
+    groups:
+    - dev-team
+  - name: admin
+    description: Admin access to the project
+    policies:
+    - p, proj:main-applications:admin, applications, *, main-applications/*, allow
+    groups:
+    - sre-team

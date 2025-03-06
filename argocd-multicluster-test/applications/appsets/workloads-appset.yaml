@@ -1,0 +1,46 @@
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: workload-applications
+  namespace: argocd
+spec:
+  generators:
+  - matrix:
+      generators:
+      - list:
+          elements:
+          - cluster: dev-cluster
+            url: https://kubernetes.dev.example.com
+            env: dev
+          - cluster: staging-cluster
+            url: https://kubernetes.staging.example.com
+            env: staging
+          - cluster: prod-cluster
+            url: https://kubernetes.prod.example.com
+            env: prod
+      - list:
+          elements:
+          - name: api-service
+            namespace: api-service-{{env}}
+          - name: frontend
+            namespace: frontend-{{env}}
+          - name: database
+            namespace: database-{{env}}
+  template:
+    metadata:
+      name: '{{name}}-{{env}}'
+    spec:
+      project: main-applications
+      source:
+        repoURL: https://github.com/organization/application-repo.git
+        targetRevision: HEAD
+        path: workloads/apps/{{name}}/overlays/{{env}}
+      destination:
+        server: '{{url}}'
+        namespace: '{{namespace}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        syncOptions:
+        - CreateNamespace=true

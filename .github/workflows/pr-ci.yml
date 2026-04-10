@@ -1,0 +1,8 @@
+name: PR CI
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  ci:
+    uses: central-crdc/governance/.github/workflows/pr-ci.yml@main

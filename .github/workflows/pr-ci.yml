@@ -11,3 +11,4 @@ permissions:
 jobs:
   ci:
     uses: central-crdc/governance/.github/workflows/pr-ci.yml@main
+    secrets: inherit
